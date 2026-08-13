@@ -219,59 +219,51 @@ if page == "🏠 Make a Prediction":
 
     st.divider()
 
-   if st.button("🔮 Predict Income", type="primary"):
+    if st.button("🔮 Predict Income", type="primary"):
 
-    education_num_map = {
-        "Preschool": 1,
-        "1st-4th": 2,
-        "5th-6th": 3,
-        "7th-8th": 4,
-        "9th": 5,
-        "10th": 6,
-        "11th": 7,
-        "12th": 8,
-        "HS-grad": 9,
-        "Some-college": 10,
-        "Assoc-voc": 11,
-        "Assoc-acdm": 12,
-        "Bachelors": 13,
-        "Masters": 14,
-        "Prof-school": 15,
-        "Doctorate": 16
-    }
+        education_num_map = {
+            "Preschool": 1,
+            "1st-4th": 2,
+            "5th-6th": 3,
+            "7th-8th": 4,
+            "9th": 5,
+            "10th": 6,
+            "11th": 7,
+            "12th": 8,
+            "HS-grad": 9,
+            "Some-college": 10,
+            "Assoc-voc": 11,
+            "Assoc-acdm": 12,
+            "Bachelors": 13,
+            "Masters": 14,
+            "Prof-school": 15,
+            "Doctorate": 16
+        }
 
-    input_data = pd.DataFrame({
-        "age": [age],
-        "workclass": [workclass],
-        "education": [education],
-        "education_num": [education_num_map[education]],
-        "marital_status": [marital_status],
-        "occupation": [occupation],
-        "relationship": [relationship],
-        "capital_gain": [capital_gain],
-        "capital_loss": [capital_loss],
-        "hours_per_week": [hours_per_week],
-        "native_country": [native_country]
-    })
+        input_data = pd.DataFrame({
+            "age": [age],
+            "workclass": [workclass],
+            "education": [education],
+            "education_num": [education_num_map[education]],
+            "marital_status": [marital_status],
+            "occupation": [occupation],
+            "relationship": [relationship],
+            "capital_gain": [capital_gain],
+            "capital_loss": [capital_loss],
+            "hours_per_week": [hours_per_week],
+            "native_country": [native_country]
+        })
 
         try:
-
             prediction = model.predict(input_data)[0]
             probability = model.predict_proba(input_data)[0][1]
 
             st.subheader("Prediction Result")
 
             if prediction == 1:
-
-                st.success(
-                    "### Predicted Income: More than $50K"
-                )
-
+                st.success("### Predicted Income: More than $50K")
             else:
-
-                st.info(
-                    "### Predicted Income: $50K or less"
-                )
+                st.info("### Predicted Income: $50K or less")
 
             st.metric(
                 "Estimated probability of income > $50K",
@@ -288,17 +280,16 @@ if page == "🏠 Make a Prediction":
             )
 
         except Exception as e:
-
-            st.error(
-                f"Prediction error: {e}"
-            )
+            st.error(f"Prediction error: {e}")
 
             st.info(
                 """
                 Check that the input features in this interface match the
                 features used to train the saved model.
                 """
-            )
+            )   
+
+    
 
 
 # =================================================
