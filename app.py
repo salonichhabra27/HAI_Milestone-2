@@ -219,20 +219,40 @@ if page == "🏠 Make a Prediction":
 
     st.divider()
 
-    if st.button("🔮 Predict Income", type="primary"):
+   if st.button("🔮 Predict Income", type="primary"):
 
-        input_data = pd.DataFrame({
-            "age": [age],
-            "workclass": [workclass],
-            "education": [education],
-            "marital-status": [marital_status],
-            "occupation": [occupation],
-            "relationship": [relationship],
-            "capital-gain": [capital_gain],
-            "capital-loss": [capital_loss],
-            "hours-per-week": [hours_per_week],
-            "native-country": [native_country]
-        })
+    education_num_map = {
+        "Preschool": 1,
+        "1st-4th": 2,
+        "5th-6th": 3,
+        "7th-8th": 4,
+        "9th": 5,
+        "10th": 6,
+        "11th": 7,
+        "12th": 8,
+        "HS-grad": 9,
+        "Some-college": 10,
+        "Assoc-voc": 11,
+        "Assoc-acdm": 12,
+        "Bachelors": 13,
+        "Masters": 14,
+        "Prof-school": 15,
+        "Doctorate": 16
+    }
+
+    input_data = pd.DataFrame({
+        "age": [age],
+        "workclass": [workclass],
+        "education": [education],
+        "education_num": [education_num_map[education]],
+        "marital_status": [marital_status],
+        "occupation": [occupation],
+        "relationship": [relationship],
+        "capital_gain": [capital_gain],
+        "capital_loss": [capital_loss],
+        "hours_per_week": [hours_per_week],
+        "native_country": [native_country]
+    })
 
         try:
 
