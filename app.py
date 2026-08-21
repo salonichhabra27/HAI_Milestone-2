@@ -67,6 +67,7 @@ page = st.sidebar.radio(
     [
         "🏠 Make a Prediction",
         "📊 Performance & Fairness",
+        "🔍 Global Explainability",
         "ℹ️ Model Information & Limitations",
         "🧠 HAX Evaluation"
     ]
@@ -350,6 +351,109 @@ elif page == "📊 Performance & Fairness":
         subgroup_df,
         use_container_width=True
     )
+
+
+# =================================================
+# PAGE 3: GLOBAL EXPLAINABILITY
+# =================================================
+
+elif page == "🔍 Global Explainability":
+
+    st.header("🔍 Global Model Explainability")
+
+    st.write(
+        """
+        Global explanations describe how the model behaves overall rather
+        than explaining only one individual prediction.
+
+        Because the final model is a Logistic Regression model, its learned
+        coefficients can be used to understand which features generally
+        push predictions toward income > $50K and which push predictions
+        toward $50K or less.
+        """
+    )
+
+    try:
+        # Access preprocessing and classifier
+        preprocessor = model.named_steps["prep"]
+        classifier = model.named_steps["clf"]
+
+        # Get transformed feature names and coefficients
+        feature_names = preprocessor.get_feature_names_out()
+        coefficients = classifier.coef_[0]
+
+        importance_df = pd.DataFrame({
+            "Feature": feature_names,
+            "Coefficient": coefficients
+        })
+
+        # Clean names for easier reading
+        importance_df["Feature"] = (
+            importance_df["Feature"]
+            .str.replace("num__", "", regex=False)
+            .str.replace("cat__", "", regex=False)
+        )
+
+        positive_features = (
+            importance_df
+            .sort_values("Coefficient", ascending=False)
+            .head(10)
+        )
+
+        negative_features = (
+            importance_df
+            .sort_values("Coefficient", ascending=True)
+            .head(10)
+        )
+
+        st.subheader("⬆️ Features Associated with Income > $50K")
+
+        st.write(
+            "Positive coefficients push the model toward predicting income above $50K."
+        )
+
+        st.bar_chart(
+            positive_features.set_index("Feature")["Coefficient"]
+        )
+
+        st.dataframe(
+            positive_features,
+            use_container_width=True,
+            hide_index=True
+        )
+
+        st.subheader("⬇️ Features Associated with Income ≤ $50K")
+
+        st.write(
+            "Negative coefficients push the model toward predicting income of $50K or less."
+        )
+
+        negative_display = negative_features.copy()
+        negative_display["Magnitude"] = negative_display["Coefficient"].abs()
+
+        st.bar_chart(
+            negative_display.set_index("Feature")["Magnitude"]
+        )
+
+        st.dataframe(
+            negative_features,
+            use_container_width=True,
+            hide_index=True
+        )
+
+        st.info(
+            """
+            These coefficients show associations learned from historical
+            training data. They should not be interpreted as evidence that
+            a feature directly causes a person's income.
+            """
+        )
+
+    except Exception as e:
+        st.error(f"Unable to generate global explanation: {e}")
+
+
+
 
 
 # =================================================
