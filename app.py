@@ -376,7 +376,8 @@ elif page == "🔍 Global Explainability":
     try:
         # Access preprocessing and classifier
         preprocessor = model.named_steps["prep"]
-        classifier = model.named_steps["clf"]
+        classifier = model.named_steps["model"]
+        
 
         # Get transformed feature names and coefficients
         feature_names = preprocessor.get_feature_names_out()
