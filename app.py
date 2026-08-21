@@ -281,6 +281,106 @@ if page == "🏠 Make a Prediction":
                 ability or potential.
                 """
             )
+            # -------------------------------------------------
+            # LOCAL EXPLANATION
+            # -------------------------------------------------
+
+            st.subheader("🔎 Why did the model make this prediction?")
+
+            preprocessor = model.named_steps["prep"]
+            classifier = model.named_steps["model"]
+
+            # Transform the single user input using the same preprocessing
+            transformed_input = preprocessor.transform(input_data)
+
+            # Feature names after preprocessing
+            feature_names = preprocessor.get_feature_names_out()
+
+            # Convert sparse matrix to dense array if needed
+            if hasattr(transformed_input, "toarray"):
+                transformed_values = transformed_input.toarray()[0]
+            else:
+                transformed_values = transformed_input[0]
+
+            # Logistic regression coefficients
+            coefficients = classifier.coef_[0]
+
+            # Local contribution = transformed feature value × coefficient
+            contributions = transformed_values * coefficients
+
+            local_df = pd.DataFrame({
+                "Feature": feature_names,
+                "Contribution": contributions
+            })
+
+            local_df["Feature"] = (
+                local_df["Feature"]
+                .str.replace("num__", "", regex=False)
+                .str.replace("cat__", "", regex=False)
+            )
+
+            # Keep the features with the strongest absolute contribution
+            local_df["Absolute Contribution"] = local_df["Contribution"].abs()
+
+            top_local = (
+                local_df
+                .sort_values("Absolute Contribution", ascending=False)
+                .head(8)
+            )
+
+            st.write(
+                """
+                The chart below shows which features had the strongest
+                influence on this specific prediction.
+
+                Positive contributions push the prediction toward
+                **income > $50K**, while negative contributions push it
+                toward **$50K or less**.
+                """
+            )
+
+            st.bar_chart(
+                top_local.set_index("Feature")["Contribution"]
+            )
+
+            st.dataframe(
+                top_local[["Feature", "Contribution"]],
+                use_container_width=True,
+                hide_index=True
+            )
+
+            positive_local = (
+                top_local[top_local["Contribution"] > 0]
+                .sort_values("Contribution", ascending=False)
+            )
+
+            negative_local = (
+                top_local[top_local["Contribution"] < 0]
+                .sort_values("Contribution", ascending=True)
+            )
+
+            if not positive_local.empty:
+                st.write(
+                    "**Main factors pushing toward income > $50K:** "
+                    + ", ".join(positive_local["Feature"].head(3).tolist())
+                )
+
+            if not negative_local.empty:
+                st.write(
+                    "**Main factors pushing toward income ≤ $50K:** "
+                    + ", ".join(negative_local["Feature"].head(3).tolist())
+                )
+
+            st.info(
+                """
+                This is a local explanation for the current input only.
+                It describes how the model combined the entered features
+                for this prediction. It does not mean these factors cause
+                a person's real-world income.
+                """
+            )
+
+        
 
         except Exception as e:
             st.error(f"Prediction error: {e}")
